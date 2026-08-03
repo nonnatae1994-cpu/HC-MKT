@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Highlands BI · Dashboard Preview</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" crossorigin="anonymous"></script>
+<style>
+:root{
+  --navy:#0B2540; --navy2:#123A5E; --teal:#0F9D8C; --teal-light:#E4F5F2;
+  --amber:#E8912D; --red:#D9483B; --purple:#7B5EA7; --bg:#F4F6F8; --card:#FFFFFF; --line:#E3E7EC;
+  --text:#16232F; --sub:#5E7080; font-size:15px;
+}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;}
+
+.app-shell{display:flex; min-height:100vh; align-items:stretch;}
+
+/* ---- SIDEBAR ---- */
+.sidebar{
+  width:270px; flex-shrink:0; background:#fff; border-right:1px solid var(--line);
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.sb-brand{display:flex; align-items:center; gap:11px; padding:20px 18px 16px;}
+.sb-logo{width:36px; height:36px; border-radius:9px; background:linear-gradient(135deg,var(--navy),var(--navy2)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#fff; flex-shrink:0;}
+.sb-brand h1{font-size:15.5px; margin:0; font-weight:800; color:var(--navy); letter-spacing:.2px;}
+.sb-brand p{margin:1px 0 0; font-size:11px; color:var(--sub);}
+
+.sb-nav{display:flex; flex-direction:column; gap:1px; padding:2px 12px 14px;}
+.sb-nav-btn{
+  text-align:left; background:transparent; border:none; padding:10px 12px; border-radius:8px;
+  font-size:13px; font-weight:600; color:var(--sub); cursor:pointer; white-space:nowrap;
+}
+.sb-nav-btn:hover{background:#F5F8F9; color:var(--navy);}
+.sb-nav-btn.active{background:var(--teal); color:#fff;}
+
+.sb-section{padding:0 18px; margin-top:6px;}
+.sb-section-title{font-size:10.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--sub); font-weight:700; margin:14px 0 8px;}
+.sb-fgroup{margin-bottom:14px;}
+.sb-fgroup label{display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--sub); font-weight:700; margin-bottom:6px;}
+.sb-fgroup select{width:100%; padding:8px 10px; border-radius:7px; border:1px solid var(--line); background:#FAFBFC; font-size:12.8px; color:var(--text);}
+.sb-chip-wrap{display:flex; flex-wrap:wrap; gap:6px;}
+.sb-chip{padding:6px 11px; border-radius:20px; border:1.5px solid var(--line); background:#FAFBFC; font-size:12px; cursor:pointer; color:var(--sub); font-weight:600; user-select:none; white-space:nowrap;}
+.sb-chip.active{background:var(--teal); border-color:var(--teal); color:#fff;}
+.sb-reset{width:100%; padding:9px 0; border-radius:8px; border:1.5px solid var(--red); color:var(--red); background:#fff; font-size:12.5px; font-weight:700; cursor:pointer; margin-top:4px;}
+.sb-reset:hover{background:#FDEEEC;}
+.sb-footer{margin-top:auto; padding:14px 18px 20px; font-size:11px; color:var(--sub); line-height:1.7; border-top:1px solid var(--line);}
+.sb-footer b{color:var(--navy);}
+
+/* ---- MAIN ---- */
+.main-content{flex:1; min-width:0; display:flex; flex-direction:column;}
+.topstrip{
+  padding:11px 26px; background:#EFFAF8; border-bottom:1px solid #D3EFE9; font-size:12.5px;
+  color:#0B7A6C; font-weight:600; position:sticky; top:0; z-index:15;
+}
+.section-num{display:flex; align-items:center; gap:10px; margin:22px 0 12px;}
+.section-num:first-child{margin-top:0;}
+.section-num .badge{
+  width:24px; height:24px; border-radius:6px; background:var(--navy); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0;
+}
+.section-num .txt{font-size:14.5px; font-weight:700; color:var(--navy);}
+
+.content{padding:22px 24px 60px;}
+.panel{display:none;}
+.panel.active{display:block;}
+.kpi-row{display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:18px;}
+.kpi{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; position:relative; overflow:hidden;}
+.kpi::before{content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--teal);}
+.kpi.amber::before{background:var(--amber);}
+.kpi.navy::before{background:var(--navy2);}
+.kpi.purple::before{background:var(--purple);}
+.kpi .lbl{font-size:11px; color:var(--sub); font-weight:700; text-transform:uppercase; letter-spacing:.4px;}
+.kpi .val{font-size:22px; font-weight:800; margin-top:6px; color:var(--navy);}
+.kpi .sub{font-size:11.5px; color:var(--sub); margin-top:4px;}
+.stack{display:flex; flex-direction:column; gap:16px;}
+.grid2col{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;}
+.mini-tbl{width:100%; border-collapse:collapse; font-size:12.8px; margin-top:4px;}
+.mini-tbl th{text-align:left; padding:7px 8px; background:#F5F8F9; color:var(--sub); font-weight:700; font-size:10.5px; text-transform:uppercase; border-bottom:2px solid var(--line);}
+.mini-tbl td{padding:8px 8px; border-bottom:1px solid var(--line);}
+.prio{padding:3px 10px; border-radius:10px; font-size:11px; font-weight:700; display:inline-block;}
+.prio.high{background:#FDEEEC; color:#B23328;}
+.prio.med{background:#FDF3E4; color:#96600F;}
+.prio.low{background:var(--teal-light); color:#0B7A6C;}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 22px; box-shadow:0 1px 2px rgba(16,30,45,.03);}
+.card-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px;}
+.card h3{margin:0 0 4px; font-size:14.5px; color:var(--navy); font-weight:700;}
+.card .desc{font-size:11.5px; color:var(--sub); line-height:1.5;}
+.card-stat{text-align:right; flex-shrink:0;}
+.card-stat .n{font-size:19px; font-weight:800; color:var(--navy); line-height:1.1;}
+.card-stat .l{font-size:10.5px; color:var(--sub); text-transform:uppercase; letter-spacing:.4px; margin-top:2px;}
+.chart-wrap{position:relative;}
+.card canvas{max-height:320px;}
+.chart-wrap.donut canvas{max-height:260px;}
+table{width:100%; border-collapse:collapse; font-size:12.8px;}
+th{text-align:left; padding:9px 10px; background:#F5F8F9; color:var(--sub); font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.3px; border-bottom:2px solid var(--line); cursor:pointer; position:sticky; top:0;}
+td{padding:8px 10px; border-bottom:1px solid var(--line); color:var(--text);}
+tr:hover td{background:#FAFCFC;}
+tr.row-khac td{color:var(--sub); font-style:italic;}
+.tag{padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;}
+.tag.instore{background:#E7F0FA; color:#1B5E9B;}
+.tag.p3{background:var(--teal-light); color:#0B7A6C;}
+.tag.p1{background:#FDEEDC; color:#B4650B;}
+.tag.grp{background:#EFECF7; color:#5B3F91;}
+.bar-mini{height:6px; border-radius:3px; background:var(--line); overflow:hidden; margin-top:4px;}
+.bar-mini > div{height:100%; background:var(--teal);}
+.insight-box{background:#FBF7ED; border:1px solid #EFDFB8; border-left:4px solid var(--amber); border-radius:10px; padding:14px 16px; margin-bottom:14px;}
+.insight-box h4{margin:0 0 6px; font-size:13px; color:#8A5A0F;}
+.insight-box p{margin:0 0 8px; font-size:12.8px; color:#5A4A2C; line-height:1.55;}
+.badge-note{display:inline-flex; align-items:center; gap:6px; background:#FDEEEC; color:var(--red); border:1px solid #F3C9C3; padding:4px 10px; border-radius:6px; font-size:11.5px; font-weight:700;}
+.dq-list{list-style:none; margin:0; padding:0;}
+.dq-list li{padding:10px 12px; border:1px solid var(--line); border-radius:8px; margin-bottom:8px; font-size:13px; display:flex; gap:10px; align-items:flex-start; background:#FAFBFC;}
+.dq-list li .dot{width:8px; height:8px; border-radius:50%; margin-top:5px; flex-shrink:0;}
+.dot.high{background:var(--red);} .dot.med{background:var(--amber);} .dot.low{background:var(--teal);}
+.footer-note{font-size:11.5px; color:var(--sub); text-align:center; padding:18px 0 6px;}
+.scroll-y{max-height:420px; overflow-y:auto;}
+.legend-quad{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--sub); margin-top:10px;}
+.legend-quad span{display:inline-flex; align-items:center; gap:5px;}
+.legend-quad i{width:10px; height:10px; border-radius:50%; display:inline-block;}
+::-webkit-scrollbar{width:8px; height:8px;}
+::-webkit-scrollbar-thumb{background:#C9D3DA; border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div id="load-overlay" style="position:fixed; inset:0; background:#F4F6F8; z-index:999; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px;">
+  <div style="width:34px; height:34px; border:3px solid #DCE3E8; border-top-color:#0F9D8C; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
+  <div id="load-msg" style="font-size:13px; color:#5E7080;">Đang tải data.json ...</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">HL</div>
+    <div>
+      <h1>Highlands BI</h1>
+      <p>Dashboard Doanh Thu MKT</p>
+    </div>
+  </div>
+
+  <nav class="sb-nav" id="tabs"></nav>
+
+  <div class="sb-section">
+    <div class="sb-section-title">Bộ lọc thời gian</div>
+    <div class="sb-fgroup"><label>Tháng</label><select id="f-month"><option value="">Tất cả</option></select></div>
+    <div class="sb-fgroup"><label>Tuần (so sánh WoW)</label><select id="f-week"><option value="">Tất cả</option></select></div>
+
+    <div class="sb-section-title">Đơn vị quản lý</div>
+    <div class="sb-fgroup"><label>OM</label><select id="f-om"><option value="">Tất cả</option></select></div>
+    <div class="sb-fgroup"><label>DM</label><select id="f-dm"><option value="">Tất cả</option></select></div>
+    <div class="sb-fgroup"><label>Cửa hàng</label><select id="f-store"><option value="">Tất cả</option></select></div>
+    <div class="sb-fgroup"><label>Mã CTKM</label><select id="f-scheme"><option value="">Tất cả</option></select></div>
+
+    <div class="sb-section-title">Kênh bán hàng</div>
+    <div class="sb-fgroup">
+      <div class="sb-chip-wrap" id="chip-lvl1">
+        <div class="sb-chip active" data-val="">Tất cả</div>
+        <div class="sb-chip" data-val="Instore">Instore</div>
+        <div class="sb-chip" data-val="Online">Online</div>
+      </div>
+    </div>
+    <div class="sb-fgroup">
+      <label>Instore / 3P / 1P</label>
+      <div class="sb-chip-wrap" id="chip-lvl2">
+        <div class="sb-chip active" data-val="">Tất cả</div>
+        <div class="sb-chip" data-val="Instore">Instore</div>
+        <div class="sb-chip" data-val="3P">3P</div>
+        <div class="sb-chip" data-val="1P">1P</div>
+      </div>
+    </div>
+
+    <button class="sb-reset" id="reset-btn">↺ Đặt lại bộ lọc</button>
+  </div>
+
+  <div class="sb-footer" id="sb-footer">Đang tải dữ liệu...</div>
+</aside>
+
+<main class="main-content">
+<div class="topstrip" id="active-note">Đang hiển thị: Tất cả dữ liệu</div>
+
+<div class="content">
+
+  <!-- TAB 0: BAO CAO BGD -->
+  <div class="panel active" id="panel-exec">
+    <div class="badge-note" style="display:flex; margin-bottom:14px;">⚠ Lưu ý quan trọng: dữ liệu hiện có 100% là giao dịch có gắn mã CTKM (chưa có doanh thu không khuyến mãi) → chưa thể tính "% doanh thu CTKM trên tổng doanh thu công ty". Cần bổ sung dữ liệu Total Revenue để có chỉ số này cho BGĐ.</div>
+    <div class="insight-box" id="exec-narrative">
+      <h4>🎯 Tóm tắt cho Ban Giám Đốc</h4>
+      <p id="exec-p1">-</p>
+      <p id="exec-p2">-</p>
+      <p id="exec-p3">-</p>
+    </div>
+
+    <div class="section-num"><span class="badge">1</span><span class="txt">Tổng quan hiệu quả CTKM</span></div>
+    <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);">
+      <div class="kpi navy">
+        <div class="lbl">Doanh thu từ CTKM</div>
+        <div class="val" id="e-net">-</div>
+        <div class="sub" id="e-net-pct">- % tổng doanh thu Gross</div>
+      </div>
+      <div class="kpi amber">
+        <div class="lbl">Chi phí trợ giá đã chi</div>
+        <div class="val" id="e-disc">-</div>
+        <div class="sub" id="e-disc-pct">- % doanh thu Gross</div>
+      </div>
+      <div class="kpi purple">
+        <div class="lbl">Hiệu suất chung</div>
+        <div class="val" id="e-roas">-</div>
+        <div class="sub">1 đồng chi phí thu về bấy nhiêu lần doanh thu</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Chương trình nên giữ / mở rộng</div>
+        <div class="val" id="e-good">-</div>
+        <div class="sub">Quy mô lớn hoặc hiệu suất cao</div>
+      </div>
+      <div class="kpi" style="border-color:#F3C9C3;">
+        <div class="lbl">Chương trình cần xem lại</div>
+        <div class="val" id="e-bad">-</div>
+        <div class="sub" id="e-bad-sub">Chi phí cao, hiệu suất dưới trung bình</div>
+      </div>
+    </div>
+
+    <div class="section-num"><span class="badge">2</span><span class="txt">Hiệu suất theo kênh bán hàng</span></div>
+    <div class="stack">
+      <div class="card">
+        <div class="card-head"><div><h3>Hiệu suất theo kênh bán hàng</h3><div class="desc">Kênh nào đang dùng chi phí trợ giá hiệu quả nhất — Instore / 3P / 1P (theo bộ lọc hiện tại)</div></div></div>
+        <div class="chart-wrap"><canvas id="chartExecChannel"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-num"><span class="badge">3</span><span class="txt">Top 5 / Bottom 5 CTKM Instore</span></div>
+    <div class="grid2col">
+      <div class="card">
+        <h3 style="color:#0B7A6C;">✓ Top 5 CTKM Instore hiệu quả nhất</h3>
+        <div class="desc">Xếp theo doanh thu mang lại sau khi trừ khấu hao (Net) · chỉ CTKM Instore (≥10 lượt dùng)</div>
+        <table class="mini-tbl"><thead><tr><th>Mã chương trình</th><th>Doanh thu sau khấu hao</th><th>AC (TB/lượt)</th></tr></thead>
+          <tbody id="exec-top-good"></tbody></table>
+      </div>
+      <div class="card">
+        <h3 style="color:#B23328;">⚠ Bottom 5 CTKM Instore cần xem lại</h3>
+        <div class="desc">Chỉ xét CTKM đã chạy đủ <b>15–30 ngày</b> (đủ thời gian đánh giá công bằng, bỏ qua mã mới chạy vài ngày) và có phát sinh ít nhất 1 lượt dùng — xếp theo doanh thu sau khấu hao thấp nhất. Cửa hàng chưa ghi nhận lượt dùng sẽ được đánh dấu riêng.</div>
+        <div class="desc" id="bottom-note" style="color:#96600F; font-weight:600;"></div>
+        <table class="mini-tbl"><thead><tr><th>Mã chương trình</th><th>Doanh thu sau khấu hao</th><th>AC (TB/lượt)</th></tr></thead>
+          <tbody id="exec-top-bad"></tbody></table>
+      </div>
+    </div>
+
+    <div class="section-num"><span class="badge">4</span><span class="txt">Đề xuất hành động</span></div>
+    <div class="card" style="margin-top:0;">
+      <h3>Đề xuất hành động</h3>
+      <div class="desc">Dựa trên phân tích Quy mô × Hiệu quả trong phạm vi bộ lọc hiện tại</div>
+      <table class="mini-tbl">
+        <thead><tr><th style="width:26%">Chương trình</th><th style="width:34%">Đề xuất hành động</th><th style="width:14%">Mức ưu tiên</th><th style="width:26%">KPI theo dõi</th></tr></thead>
+        <tbody id="exec-actions"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 1: TONG QUAN -->
+  <div class="panel" id="panel-overview">
+    <div class="section-num"><span class="badge">1</span><span class="txt">Tổng quan doanh thu</span></div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="lbl">Doanh thu Net</div><div class="val" id="k-net">-</div><div class="sub" id="k-net-sub">Tổng theo bộ lọc</div></div>
+      <div class="kpi amber"><div class="lbl">Chiết khấu (Discount)</div><div class="val" id="k-disc">-</div><div class="sub" id="k-disc-rate">-</div></div>
+      <div class="kpi navy"><div class="lbl">Lượt sử dụng (TC)</div><div class="val" id="k-tc">-</div><div class="sub">Số lượt áp dụng CTKM</div></div>
+      <div class="kpi"><div class="lbl">Doanh thu Gross</div><div class="val" id="k-gross">-</div><div class="sub">Trước chiết khấu</div></div>
+      <div class="kpi amber"><div class="lbl">AC trung bình</div><div class="val" id="k-ac">-</div><div class="sub">Net / TC</div></div>
+    </div>
+    <div class="section-num"><span class="badge">2</span><span class="txt">Biểu đồ chi tiết</span></div>
+    <div class="stack">
+      <div class="card">
+        <div class="card-head">
+          <div><h3>Xu hướng doanh thu Net theo ngày</h3><div class="desc" id="trend-desc">Phân theo Instore / 3P / 1P · đã liên kết với Store / DM / OM / Channel ở trên</div></div>
+          <div class="card-stat"><div class="n" id="stat-trend-total">-</div><div class="l">Tổng theo bộ lọc</div></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div><h3>Cơ cấu kênh (Channel Mix)</h3><div class="desc">Tỷ trọng doanh thu Net theo Instore / 3P / 1P — theo bộ lọc hiện tại</div></div>
+          <div class="card-stat"><div class="n" id="stat-mix-total">-</div><div class="l">Net theo bộ lọc</div></div>
+        </div>
+        <div class="chart-wrap donut"><canvas id="chartMix"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div><h3>Hiệu suất theo OM</h3><div class="desc">Doanh thu Net theo Operation Manager — theo bộ lọc hiện tại</div></div>
+          <div class="card-stat"><div class="n" id="stat-om-count">-</div><div class="l">OM đang hiển thị</div></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chartOM"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div><h3>Top 8 / Bottom 8 cửa hàng theo Net</h3><div class="desc">Xếp hạng nhanh trong phạm vi lọc hiện tại — xanh là top, đỏ là cần chú ý</div></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chartStoreRank"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: STORE RANKING -->
+  <div class="panel" id="panel-store">
+    <div class="card">
+      <h3>Bảng xếp hạng cửa hàng</h3>
+      <div class="desc">Nhấp tiêu đề cột để sắp xếp · <span id="store-count-note"></span></div>
+      <div class="scroll-y">
+        <table id="tbl-store">
+          <thead><tr>
+            <th data-k="store_name">Cửa hàng</th><th data-k="DM">DM</th><th data-k="OM">OM</th>
+            <th data-k="lvl2">Kênh</th><th data-k="gross">Doanh thu trước CK</th>
+            <th data-k="discount">Số tiền giảm giá</th><th data-k="net">Doanh thu thực nhận</th><th data-k="tc">Lượt mua</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: DM/OM -->
+  <div class="panel" id="panel-dmom">
+    <div class="stack">
+      <div class="card">
+        <div class="card-head"><div><h3>Doanh thu Net theo OM</h3><div class="desc">Theo bộ lọc hiện tại</div></div></div>
+        <div class="chart-wrap"><canvas id="chartOM2"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Top 12 DM theo doanh thu Net</h3><div class="desc">Theo bộ lọc hiện tại</div></div></div>
+        <div class="chart-wrap"><canvas id="chartDM"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <h3>Chi tiết theo DM</h3>
+      <div class="scroll-y">
+        <table id="tbl-dm">
+          <thead><tr><th data-k="DM">DM</th><th data-k="OM">OM quản lý</th><th data-k="stores">Số cửa hàng</th>
+          <th data-k="gross">Doanh thu trước CK</th><th data-k="discount">Số tiền giảm giá</th><th data-k="net">Doanh thu thực nhận</th><th data-k="rate">Tỷ lệ giảm giá</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: CTKM -->
+  <div class="panel" id="panel-ctkm">
+    <div class="insight-box">
+      <h4>🔑 Điểm cần chú ý — CTKM nào đang thực sự hiệu quả?</h4>
+      <p><b>1.</b> Mã "Khuyến mãi giá cố định" (Instore) lớn nhất hệ thống (~6% tổng doanh thu thực nhận) nhưng cứ 1 đồng bỏ ra chỉ thu về <b>~4 lần</b> — thấp hơn nhiều mức trung bình hệ thống (~12–16 lần). Đây là chương trình cần xem lại hiệu quả, không nên đánh giá chỉ vì nó "lớn nhất".</p>
+      <p><b>2.</b> Ngược lại, nhiều mã quy mô nhỏ như nhóm "CB" (Chuyên Trọ, Hưng Khởi) hay Combo Trà Chiều của Grab tuy doanh thu không lớn nhưng hiệu suất rất cao (30–90 lần) — đáng cân nhắc nhân rộng ra nhiều cửa hàng hơn.</p>
+      <p><b>3.</b> Có <b>12 mã đang gắn nhãn CTKM nhưng thực chất là chi phí nội bộ</b> (quà nhân viên, testing, PR — giảm giá 100%, doanh thu 0đ). Các mã này đã được tách sang bảng riêng bên dưới, không tính vào hiệu quả CTKM khách hàng.</p>
+    </div>
+
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi"><div class="lbl">Doanh thu từ CTKM khách hàng</div><div class="val" id="c-net">-</div><div class="sub">Đã loại trừ chi phí nội bộ</div></div>
+      <div class="kpi amber"><div class="lbl">Chi phí trợ giá đã chi</div><div class="val" id="c-disc">-</div><div class="sub" id="c-disc-note">-</div></div>
+      <div class="kpi purple"><div class="lbl">Hiệu suất trung bình</div><div class="val" id="c-roas">-</div><div class="sub">1 đồng chi phí thu về bấy nhiêu lần doanh thu</div></div>
+      <div class="kpi navy"><div class="lbl">Số chương trình đang chạy</div><div class="val" id="c-count">-</div><div class="sub" id="c-count-note">-</div></div>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="card-head"><div><h3>Ma trận Quy mô × Hiệu quả</h3><div class="desc">Mỗi điểm là 1 mã CTKM (kích thước điểm = số lượt dùng) · Trục ngang = Doanh thu thực nhận (quy mô) · Trục dọc = Hiệu suất (đồng thu về / đồng chi phí). Đã loại các mã chi phí nội bộ.</div></div></div>
+        <div class="chart-wrap" style="height:380px;"><canvas id="chartQuadrant"></canvas></div>
+        <div class="legend-quad">
+          <span><i style="background:#0F9D8C"></i> Ngôi sao — quy mô lớn, hiệu suất cao → nên giữ</span>
+          <span><i style="background:#D9483B"></i> Cần xem lại — quy mô lớn, hiệu suất thấp</span>
+          <span><i style="background:#123A5E"></i> Đáng nhân rộng — quy mô nhỏ, hiệu suất cao</span>
+          <span><i style="background:#B7C0C8"></i> Cân nhắc dừng — quy mô nhỏ, hiệu suất thấp</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Doanh thu theo nhóm chương trình</h3><div class="desc">Gom theo nhóm/đối tác CTKM (không tính chi phí nội bộ) — theo bộ lọc hiện tại</div></div></div>
+        <div class="chart-wrap"><canvas id="chartSchemeGroup"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Bảng chi tiết từng mã CTKM</h3>
+      <div class="desc">Liên kết đầy đủ với bộ lọc Store / DM / OM / Channel ở trên · Các mã dưới 10 lượt dùng được gộp vào dòng "Các mã nhỏ khác" ở cuối bảng</div>
+      <div class="scroll-y">
+        <table id="tbl-scheme">
+          <thead><tr>
+            <th data-k="scheme_code">Mã chương trình</th><th data-k="grp">Nhóm</th><th data-k="lvl2">Kênh</th>
+            <th data-k="net">Doanh thu thực nhận</th><th data-k="discount">Chi phí trợ giá</th>
+            <th data-k="ac">AC (giá trị TB/lượt)</th>
+            <th data-k="roas">Hiệu suất (lần)</th><th data-k="cost_per_use">Chi phí / lượt dùng</th>
+            <th data-k="stores">Số cửa hàng</th><th data-k="tc">Lượt dùng</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Chi phí nội bộ / vận hành (không phải CTKM khách hàng)</h3>
+      <div class="desc">Các mã có giảm giá 100% và không phát sinh doanh thu — quà nhân viên, testing, PR nội bộ. Tách riêng để không làm sai lệch hiệu quả CTKM.</div>
+      <div class="scroll-y">
+        <table id="tbl-internal">
+          <thead><tr><th data-k="scheme_code">Mã</th><th data-k="tc">Số lượt sử dụng</th><th data-k="stores">Số cửa hàng</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<div class="footer-note">Preview tương tác dựng từ dữ liệu chi tiết Store × DM × OM × Scheme × Channel · Bản build chính thức (Power BI / Excel Power Pivot) sẽ mở rộng thêm Ngày/Tuần/Quý/Năm khi có đủ dữ liệu lịch sử.</div>
+
+</main>
+</div>
+
+<script>
+let RAW, FACT, DAILY, SCHEME_META, WEEK_META, MAX_DATE;
+const GRP_LABEL = {
+  LOYALTY:'Loyalty App', SPF:'SPF', NWDC:'NWDC', '3Ps':'3P (đối tác giao hàng)', HLA:'HLA',
+  LSM_HCM:'LSM HCM', GRAB:'Grab', MM:'MM', WO_NWSM:'WO NWSM', CB:'CB',
+  KM_GACHGIA:'Khuyến mãi giá cố định', KHAC:'Nhóm nhỏ khác', NOIBO:'Nội bộ / Vận hành'
+};
+// Các nhóm CTKM thuộc đối tác nền tảng (Grab/Be/3P giao hàng) — dù có dòng nào gắn nhãn kênh "Instore"
+// vẫn không tính vào phân tích Instore vì công ty không chủ động điều chỉnh được cơ chế của đối tác.
+const PLATFORM_GROUPS = ['3Ps', 'GRAB', 'BE'];
+
+const TABS = [
+  {id:'exec', label:'📊 Báo cáo BGĐ'},
+  {id:'overview', label:'Tổng quan'},
+  {id:'store', label:'Xếp hạng cửa hàng'},
+  {id:'dmom', label:'DM / OM'},
+  {id:'ctkm', label:'Hiệu quả CTKM'},
+];
+const tabsEl = document.getElementById('tabs');
+TABS.forEach((t,i)=>{
+  const b = document.createElement('button');
+  b.className = 'sb-nav-btn' + (i===0?' active':'');
+  b.textContent = t.label;
+  b.onclick = ()=>{
+    document.querySelectorAll('.sb-nav-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('panel-'+t.id).classList.add('active');
+  };
+  tabsEl.appendChild(b);
+});
+
+function fmtVND(n){ if(n===undefined||n===null||isNaN(n)) return '-';
+  if(Math.abs(n)>=1e9) return (n/1e9).toFixed(2)+' tỷ';
+  if(Math.abs(n)>=1e6) return (n/1e6).toFixed(1)+' tr';
+  return Math.round(n).toLocaleString('vi-VN'); }
+function fmtInt(n){return Math.round(n).toLocaleString('vi-VN');}
+function fmtPct(n){return (n*100).toFixed(1)+'%';}
+function fmtX(n){ if(n===undefined||n===null||!isFinite(n)) return '-'; return n.toFixed(1)+'x'; }
+
+let state = {store:'', dm:'', om:'', scheme:'', lvl1:'', lvl2:'', week:''};
+
+function uniqueSorted(arr, key, filterFn){ return [...new Set(arr.filter(filterFn).map(r=>r[key]))].sort(); }
+
+function rebuildOptions(){
+  const omBase = r => (!state.dm || r.DM===state.dm) && (!state.store || r.store_name===state.store) &&
+                       (!state.scheme || r.scheme_code===state.scheme) && (!state.lvl1 || r.lvl1===state.lvl1) && (!state.lvl2 || r.lvl2===state.lvl2) && (!state.week || r.week===state.week);
+  const dmBase = r => (!state.om || r.OM===state.om) && (!state.store || r.store_name===state.store) &&
+                       (!state.scheme || r.scheme_code===state.scheme) && (!state.lvl1 || r.lvl1===state.lvl1) && (!state.lvl2 || r.lvl2===state.lvl2) && (!state.week || r.week===state.week);
+  const storeBase = r => (!state.om || r.OM===state.om) && (!state.dm || r.DM===state.dm) &&
+                       (!state.scheme || r.scheme_code===state.scheme) && (!state.lvl1 || r.lvl1===state.lvl1) && (!state.lvl2 || r.lvl2===state.lvl2) && (!state.week || r.week===state.week);
+  const schemeBase = r => (!state.om || r.OM===state.om) && (!state.dm || r.DM===state.dm) &&
+                       (!state.store || r.store_name===state.store) && (!state.lvl1 || r.lvl1===state.lvl1) && (!state.lvl2 || r.lvl2===state.lvl2) && (!state.week || r.week===state.week);
+  fillSelectPreserve('f-om', uniqueSorted(FACT,'OM',omBase), state.om);
+  fillSelectPreserve('f-dm', uniqueSorted(FACT,'DM',dmBase), state.dm);
+  fillSelectPreserve('f-store', uniqueSorted(FACT,'store_name',storeBase), state.store);
+  fillSelectPreserve('f-scheme', uniqueSorted(FACT,'scheme_code',schemeBase), state.scheme);
+}
+function fillSelectPreserve(id, arr, currentVal){
+  const sel = document.getElementById(id);
+  sel.innerHTML = '<option value="">Tất cả</option>';
+  arr.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
+  sel.value = arr.includes(currentVal) ? currentVal : '';
+  if(!arr.includes(currentVal)){
+    if(id==='f-om') state.om=''; if(id==='f-dm') state.dm=''; if(id==='f-store') state.store=''; if(id==='f-scheme') state.scheme='';
+  }
+}
+
+document.getElementById('f-month').innerHTML = '<option value="">Tháng 7/2026</option>';
+function fillWeeks(){
+  const sel = document.getElementById('f-week');
+  sel.innerHTML = '<option value="">Tất cả</option>';
+  Object.keys(WEEK_META).sort((a,b)=>+a-+b).forEach(wk=>{
+    const m = WEEK_META[wk];
+    const o = document.createElement('option');
+    o.value = wk; o.textContent = 'Tuần '+wk+' ('+m.start+'–'+m.end+')';
+    sel.appendChild(o);
+  });
+}
+document.getElementById('f-week').onchange = e=>{state.week=e.target.value; rebuildOptions(); render();};
+document.getElementById('f-om').onchange = e=>{state.om=e.target.value; rebuildOptions(); render();};
+document.getElementById('f-dm').onchange = e=>{state.dm=e.target.value; rebuildOptions(); render();};
+document.getElementById('f-store').onchange = e=>{state.store=e.target.value; rebuildOptions(); render();};
+document.getElementById('f-scheme').onchange = e=>{state.scheme=e.target.value; rebuildOptions(); render();};
+document.querySelectorAll('#chip-lvl1 .sb-chip').forEach(c=>{
+  c.onclick=()=>{document.querySelectorAll('#chip-lvl1 .sb-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');state.lvl1=c.dataset.val;rebuildOptions();render();};
+});
+document.querySelectorAll('#chip-lvl2 .sb-chip').forEach(c=>{
+  c.onclick=()=>{document.querySelectorAll('#chip-lvl2 .sb-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');state.lvl2=c.dataset.val;rebuildOptions();render();};
+});
+document.getElementById('reset-btn').onclick=()=>{
+  state = {store:'', dm:'', om:'', scheme:'', lvl1:'', lvl2:'', week:''};
+  document.getElementById('f-week').value='';
+  document.querySelectorAll('#chip-lvl1 .sb-chip').forEach(x=>x.classList.remove('active'));
+  document.querySelector('#chip-lvl1 .sb-chip').classList.add('active');
+  document.querySelectorAll('#chip-lvl2 .sb-chip').forEach(x=>x.classList.remove('active'));
+  document.querySelector('#chip-lvl2 .sb-chip').classList.add('active');
+  rebuildOptions(); render();
+};
+
+function filterFact(){
+  return FACT.filter(r=>
+    (!state.store || r.store_name===state.store) && (!state.dm || r.DM===state.dm) &&
+    (!state.om || r.OM===state.om) && (!state.scheme || r.scheme_code===state.scheme) &&
+    (!state.lvl1 || r.lvl1===state.lvl1) && (!state.lvl2 || r.lvl2===state.lvl2) &&
+    (!state.week || r.week===state.week)
+  );
+}
+function filterDaily(){
+  return DAILY.filter(r=>
+    (!state.store || r.store_name===state.store) &&
+    (!state.dm || r.DM===state.dm) &&
+    (!state.om || r.OM===state.om) &&
+    (!state.lvl1 || r.lvl1===state.lvl1) &&
+    (!state.lvl2 || r.lvl2===state.lvl2) &&
+    (!state.week || r.week===state.week)
+  );
+}
+
+Chart.defaults.font.family = "'Segoe UI', -apple-system, sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#5E7080';
+Chart.defaults.plugins.tooltip.backgroundColor = '#0B2540';
+Chart.defaults.plugins.tooltip.titleColor = '#fff';
+Chart.defaults.plugins.tooltip.bodyColor = '#E4EDF3';
+Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+Chart.defaults.plugins.tooltip.displayColors = false;
+Chart.defaults.plugins.tooltip.titleFont = {weight:'700', size:12};
+Chart.defaults.plugins.tooltip.bodyFont = {size:12};
+Chart.defaults.animation.duration = 550;
+Chart.defaults.animation.easing = 'easeOutQuart';
+
+const GRID = {color:'#EEF1F4', drawTicks:false};
+const NOGRID = {display:false, drawTicks:false};
+
+function hbar(labels, values, color, opts){
+  opts = opts||{};
+  return {type:'bar', data:{labels, datasets:[{data:values, backgroundColor:color, borderRadius:6, borderSkipped:false,
+      maxBarThickness:22, hoverBackgroundColor:opts.hover||color}]},
+    options:{indexAxis:'y', plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>' '+fmtVND(ctx.parsed.x)+' đ'}}},
+      scales:{ x:{grid:GRID, border:{display:false}, ticks:{callback:v=>fmtVND(v)}},
+               y:{grid:NOGRID, border:{display:false}} },
+      layout:{padding:{right:8}}
+    }};
+}
+
+// plugin: center label for doughnut
+const centerTextPlugin = {
+  id:'centerText',
+  afterDraw(chart){
+    if(chart.config.type!=='doughnut' || !chart._centerText) return;
+    const {ctx, chartArea:{left,right,top,bottom}} = chart;
+    const cx = (left+right)/2, cy=(top+bottom)/2;
+    ctx.save();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='800 17px Segoe UI'; ctx.fillStyle='#0B2540';
+    ctx.fillText(chart._centerText.top, cx, cy-9);
+    ctx.font='11px Segoe UI'; ctx.fillStyle='#5E7080';
+    ctx.fillText(chart._centerText.bottom, cx, cy+11);
+    ctx.restore();
+  }
+};
+// plugin: quadrant background shading for scatter
+const quadrantBgPlugin = {
+  id:'quadrantBg',
+  beforeDatasetsDraw(chart){
+    if(!chart._quadrant) return;
+    const {ctx, chartArea:{left,right,top,bottom}, scales:{x,y}} = chart;
+    const mx = x.getPixelForValue(chart._quadrant.mx), my = y.getPixelForValue(chart._quadrant.my);
+    ctx.save();
+    ctx.fillStyle = 'rgba(15,157,138,0.055)'; ctx.fillRect(mx, top, right-mx, my-top);       // top-right: star
+    ctx.fillStyle = 'rgba(217,72,59,0.05)'; ctx.fillRect(mx, my, right-mx, bottom-my);       // bottom-right: review
+    ctx.fillStyle = 'rgba(18,58,94,0.045)'; ctx.fillRect(left, top, mx-left, my-top);        // top-left: scale up
+    ctx.fillStyle = 'rgba(183,192,200,0.09)'; ctx.fillRect(left, my, mx-left, bottom-my);    // bottom-left: cut
+    ctx.strokeStyle = '#D8DFE5'; ctx.setLineDash([4,4]); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(mx, top); ctx.lineTo(mx, bottom); ctx.moveTo(left, my); ctx.lineTo(right, my); ctx.stroke();
+    ctx.restore();
+  }
+};
+Chart.register(centerTextPlugin, quadrantBgPlugin);
+
+let charts = {};
+function makeChart(id, config){ if(charts[id]) charts[id].destroy(); charts[id] = new Chart(document.getElementById(id), config); }
+
+function updateActiveNote(){
+  const parts = [];
+  if(state.week) parts.push('Tuần '+state.week+' ('+WEEK_META[state.week].start+'–'+WEEK_META[state.week].end+')');
+  if(state.om) parts.push('OM: '+state.om);
+  if(state.dm) parts.push('DM: '+state.dm);
+  if(state.store) parts.push('Store: '+state.store);
+  if(state.scheme) parts.push('CTKM: '+state.scheme);
+  if(state.lvl1) parts.push('Channel: '+state.lvl1);
+  if(state.lvl2) parts.push('Nhóm: '+state.lvl2);
+  document.getElementById('active-note').textContent = parts.length
+    ? 'Đang lọc theo: '+parts.join(' · ')
+    : 'Đang hiển thị: Tất cả dữ liệu';
+}
+
+function wowCompare(currentTotal, weekField){
+  // so sánh với tuần liền trước (cùng bộ lọc Store/DM/OM/Scheme/Channel)
+  if(!state.week) return null;
+  const weeks = Object.keys(WEEK_META).map(Number).sort((a,b)=>a-b);
+  const idx = weeks.indexOf(Number(state.week));
+  if(idx<=0) return {text:'Không có tuần trước để so sánh', delta:null};
+  const prevWeek = String(weeks[idx-1]);
+  const prevRows = FACT.filter(r=>
+    (!state.store || r.store_name===state.store) && (!state.dm || r.DM===state.dm) &&
+    (!state.om || r.OM===state.om) && (!state.scheme || r.scheme_code===state.scheme) &&
+    (!state.lvl1 || r.lvl1===state.lvl1) && (!state.lvl2 || r.lvl2===state.lvl2) &&
+    r.week===prevWeek
+  );
+  const prevTotal = prevRows.reduce((a,r)=>a+r[weekField],0);
+  if(!prevTotal) return {text:'Tuần '+prevWeek+' không có dữ liệu để so sánh', delta:null};
+  const delta = (currentTotal-prevTotal)/prevTotal*100;
+  return {text:(delta>=0?'▲ +':'▼ ')+delta.toFixed(1)+'% so với tuần '+prevWeek, delta};
+}
+
+function render(){
+  updateActiveNote();
+  const f = filterFact();
+  const gross = f.reduce((a,r)=>a+r.gross,0);
+  const discount = f.reduce((a,r)=>a+r.discount,0);
+  const net = f.reduce((a,r)=>a+r.net,0);
+  const tc = f.reduce((a,r)=>a+r.tc,0);
+
+  document.getElementById('k-net').textContent = fmtVND(net)+' đ';
+  const wow = wowCompare(net, 'net');
+  document.getElementById('k-net-sub').innerHTML = wow
+    ? '<b style="color:'+(wow.delta===null?'#5E7080':(wow.delta>=0?'#0B7A6C':'#B23328'))+'">'+wow.text+'</b>'
+    : f.length+' dòng khớp bộ lọc';
+  document.getElementById('k-disc').textContent = fmtVND(discount)+' đ';
+  document.getElementById('k-disc-rate').textContent = 'Tỷ lệ giảm giá: '+(gross?fmtPct(discount/gross):'-');
+  document.getElementById('k-tc').textContent = fmtInt(tc);
+  document.getElementById('k-gross').textContent = fmtVND(gross)+' đ';
+  document.getElementById('k-ac').textContent = fmtVND(tc? net/tc : 0)+' đ';
+
+  const dc = filterDaily();
+  const dates = [...new Set(dc.map(r=>r.d))].sort();
+  const byChannel = {};
+  dc.forEach(r=>{ byChannel[r.lvl2] = byChannel[r.lvl2]||{}; byChannel[r.lvl2][r.d] = (byChannel[r.lvl2][r.d]||0)+r.net; });
+  const colors = {Instore:'#0F9D8C', '3P':'#123A5E', '1P':'#E8912D'};
+  const dLabels = dates.map(d=>{ const dt=new Date(d); return dt.getDate()+'/'+(dt.getMonth()+1); });
+  const trendTotal = dc.reduce((a,r)=>a+r.net,0);
+  document.getElementById('stat-trend-total').textContent = fmtVND(trendTotal)+' đ';
+  const trendDatasets = Object.keys(byChannel).map(k=>({
+    label:k, data:dates.map(d=>byChannel[k][d]||0), borderColor:colors[k]||'#888',
+    backgroundColor:(ctx)=>{
+      const {ctx:c, chartArea} = ctx.chart; if(!chartArea) return (colors[k]||'#888')+'22';
+      const grad = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+      grad.addColorStop(0,(colors[k]||'#888')+'55'); grad.addColorStop(1,(colors[k]||'#888')+'02'); return grad;
+    },
+    fill:true, tension:.4, borderWidth:2.5, pointRadius:3, pointBackgroundColor:'#fff',
+    pointBorderColor:colors[k]||'#888', pointBorderWidth:2, pointHoverRadius:6
+  }));
+  makeChart('chartTrend', {type:'line', data:{labels:dLabels, datasets:trendDatasets},
+    options:{interaction:{mode:'index', intersect:false}, plugins:{legend:{position:'bottom', labels:{usePointStyle:true, boxWidth:8, boxHeight:8, padding:16}},
+      tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmtVND(ctx.parsed.y)+' đ'}}},
+      scales:{ y:{grid:GRID, border:{display:false}, ticks:{callback:v=>fmtVND(v)}}, x:{grid:NOGRID, border:{display:false}} }}});
+
+  const mix = {};
+  f.forEach(r=>{mix[r.lvl2]=(mix[r.lvl2]||0)+r.net;});
+  const mixTotal = Object.values(mix).reduce((a,b)=>a+b,0);
+  document.getElementById('stat-mix-total').textContent = fmtVND(mixTotal)+' đ';
+  if(charts['chartMix']) charts['chartMix'].destroy();
+  const mixChart = new Chart(document.getElementById('chartMix'), {type:'doughnut',
+    data:{labels:Object.keys(mix), datasets:[{data:Object.values(mix), backgroundColor:Object.keys(mix).map(k=>colors[k]||'#888'),
+      borderWidth:3, borderColor:'#fff', hoverOffset:6}]},
+    options:{cutout:'70%', plugins:{legend:{position:'bottom', labels:{usePointStyle:true, boxWidth:8, boxHeight:8, padding:16}},
+      tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+fmtVND(ctx.parsed)+' đ ('+(ctx.parsed/mixTotal*100).toFixed(1)+'%)'}}}}});
+  mixChart._centerText = {top: fmtVND(mixTotal), bottom:'Tổng Net'};
+  charts['chartMix']=mixChart;
+
+  const omAgg = {};
+  f.forEach(r=>{omAgg[r.OM]=(omAgg[r.OM]||0)+r.net;});
+  const omSorted = Object.entries(omAgg).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('stat-om-count').textContent = omSorted.length;
+  makeChart('chartOM', hbar(omSorted.map(x=>x[0]), omSorted.map(x=>x[1]), '#0F9D8C'));
+  makeChart('chartOM2', hbar(omSorted.map(x=>x[0]), omSorted.map(x=>x[1]), '#0F9D8C'));
+
+  const dmAgg = {};
+  f.forEach(r=>{dmAgg[r.DM]=(dmAgg[r.DM]||0)+r.net;});
+  const dmSorted = Object.entries(dmAgg).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  makeChart('chartDM', hbar(dmSorted.map(x=>x[0]), dmSorted.map(x=>x[1]), '#123A5E'));
+
+  const storeAgg = {};
+  f.forEach(r=>{storeAgg[r.store_name]=(storeAgg[r.store_name]||0)+r.net;});
+  const storeSorted = Object.entries(storeAgg).sort((a,b)=>b[1]-a[1]);
+  const top8 = storeSorted.slice(0,8);
+  const bot8 = storeSorted.slice(-8).reverse();
+  makeChart('chartStoreRank', {type:'bar', data:{
+    labels:[...top8.map(x=>x[0]), '· · ·', ...bot8.map(x=>x[0])],
+    datasets:[{data:[...top8.map(x=>x[1]), null, ...bot8.map(x=>x[1])], borderRadius:6, borderSkipped:false, maxBarThickness:20,
+      backgroundColor:ctx=>{ const i = ctx.dataIndex; return i < top8.length ? '#0F9D8C' : '#D9483B'; }}]},
+    options:{indexAxis:'y', plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>' '+fmtVND(ctx.parsed.x)+' đ'}}},
+      scales:{ x:{grid:GRID, border:{display:false}, ticks:{callback:v=>fmtVND(v)}}, y:{grid:NOGRID, border:{display:false}} }}});
+
+  const storeRows = {};
+  f.forEach(r=>{
+    const key = r.store_name+'|'+r.lvl2;
+    if(!storeRows[key]) storeRows[key]={store_name:r.store_name, DM:r.DM, OM:r.OM, lvl2:r.lvl2, gross:0, discount:0, net:0, tc:0};
+    storeRows[key].gross+=r.gross; storeRows[key].discount+=r.discount; storeRows[key].net+=r.net; storeRows[key].tc+=r.tc;
+  });
+  const tbody1 = document.querySelector('#tbl-store tbody'); tbody1.innerHTML='';
+  document.getElementById('store-count-note').textContent = Object.keys(storeRows).length+' dòng (theo cửa hàng × kênh)';
+  Object.values(storeRows).sort((a,b)=>b.net-a.net).forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.store_name}</td><td>${r.DM}</td><td>${r.OM}</td>
+      <td><span class="tag ${r.lvl2==='3P'?'p3':(r.lvl2==='1P'?'p1':'instore')}">${r.lvl2}</span></td>
+      <td>${fmtVND(r.gross)}</td><td>${fmtVND(r.discount)}</td><td><b>${fmtVND(r.net)}</b></td><td>${fmtInt(r.tc)}</td>`;
+    tbody1.appendChild(tr);
+  });
+
+  const dmRows = {};
+  f.forEach(r=>{
+    if(!dmRows[r.DM]) dmRows[r.DM]={DM:r.DM, OM:r.OM, stores:new Set(), gross:0, discount:0, net:0};
+    dmRows[r.DM].stores.add(r.store_name);
+    dmRows[r.DM].gross+=r.gross; dmRows[r.DM].discount+=r.discount; dmRows[r.DM].net+=r.net;
+  });
+  const tbody2 = document.querySelector('#tbl-dm tbody'); tbody2.innerHTML='';
+  Object.values(dmRows).sort((a,b)=>b.net-a.net).forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.DM}</td><td>${r.OM}</td><td>${r.stores.size}</td>
+      <td>${fmtVND(r.gross)}</td><td>${fmtVND(r.discount)}</td><td><b>${fmtVND(r.net)}</b></td>
+      <td>${r.gross? fmtPct(r.discount/r.gross):'-'}</td>`;
+    tbody2.appendChild(tr);
+  });
+
+  renderExec(f);
+  renderCTKM(f);
+}
+
+function instoreDurationAgg(f){
+  // Với mỗi mã CTKM Instore (không tính nội bộ, không tính nhóm 3P dù có dòng gắn nhãn Instore):
+  // tổng net/discount/promo/tc, số cửa hàng có bật CTKM, số cửa hàng KHÔNG ghi nhận lượt dùng nào,
+  // và thời lượng chạy (số ngày ước tính từ số tuần xuất hiện)
+  const rows = {};
+  f.forEach(r=>{
+    if(r.lvl2!=='Instore') return;
+    const meta = SCHEME_META[r.scheme_code] || {i:false, g:''};
+    if(meta.i) return; // bỏ qua mã nội bộ
+    if(PLATFORM_GROUPS.includes(meta.g)) return; // mã thuộc nhóm đối tác nền tảng (Grab/Be/3P) — dù có dòng gắn nhãn Instore, không tính vào đây
+    if(!rows[r.scheme_code]) rows[r.scheme_code] = {
+      scheme_code:r.scheme_code, net:0, discount:0, promo:0, tc:0,
+      storesTotal:new Set(), storesUsed:new Set(), weeks:new Set()
+    };
+    const o = rows[r.scheme_code];
+    o.net+=r.net; o.discount+=r.discount; o.promo+=r.promo; o.tc+=r.tc;
+    o.storesTotal.add(r.store_code);
+    if(r.tc>0) o.storesUsed.add(r.store_code);
+    o.weeks.add(r.week);
+  });
+  return Object.values(rows).map(o=>{
+    const weeksArr = [...o.weeks].map(Number).sort((a,b)=>a-b);
+    const spanWeeks = weeksArr.length? (weeksArr[weeksArr.length-1]-weeksArr[0]+1) : 0;
+    return {...o, spanDays: spanWeeks*7,
+      storesZero: o.storesTotal.size-o.storesUsed.size,
+      ac: o.tc? o.net/o.tc : 0};
+  });
+}
+
+function schemeAggregate(f){
+  const rows = {};
+  f.forEach(r=>{
+    const meta = SCHEME_META[r.scheme_code] || {g:'KHAC', i:false};
+    const key = r.scheme_code+'|'+r.lvl1+'|'+r.lvl2;
+    if(!rows[key]) rows[key]={scheme_code:r.scheme_code, grp:meta.g, internal:meta.i, lvl1:r.lvl1, lvl2:r.lvl2,
+      gross:0, discount:0, net:0, promo:0, tc:0, stores:new Set()};
+    rows[key].gross+=r.gross; rows[key].discount+=r.discount; rows[key].net+=r.net; rows[key].promo+=r.promo; rows[key].tc+=r.tc;
+    rows[key].stores.add(r.store_code);
+  });
+  const all = Object.values(rows);
+  const internalRows = all.filter(r=>r.internal);
+  const customerRows = all.filter(r=>!r.internal);
+  const bigRows = customerRows.filter(r=>r.tc>=10);
+  const smallRows = customerRows.filter(r=>r.tc<10);
+  return {all, internalRows, customerRows, bigRows, smallRows};
+}
+
+function renderExec(f){
+  const {internalRows, customerRows, bigRows} = schemeAggregate(f);
+  const totalNet = customerRows.reduce((a,r)=>a+r.net,0);
+  const totalDiscount = customerRows.reduce((a,r)=>a+r.discount,0);
+  const totalGross = customerRows.reduce((a,r)=>a+r.gross,0);
+  const totalPromo = customerRows.reduce((a,r)=>a+r.promo,0);
+
+  document.getElementById('e-net').textContent = fmtVND(totalNet)+' đ';
+  document.getElementById('e-net-pct').textContent = 'Chỉ tính giao dịch có gắn mã CTKM';
+  document.getElementById('e-disc').textContent = fmtVND(totalDiscount)+' đ';
+  document.getElementById('e-disc-pct').textContent = 'Tỷ lệ giảm giá TB: '+(totalGross? fmtPct(totalDiscount/totalGross):'-')+' trên các giao dịch này';
+  document.getElementById('e-roas').textContent = totalPromo? fmtX(totalNet/totalPromo) : '-';
+
+  // Chỉ tập trung CTKM Instore — đây là nhóm công ty có thể chủ động điều chỉnh (3P/1P do đối tác nền tảng kiểm soát)
+  const instoreBig = bigRows.filter(r=>r.lvl2==='Instore' && !PLATFORM_GROUPS.includes(r.grp));
+  const withRoas = instoreBig.map(r=>({...r, roas: r.promo? r.net/r.promo:0, ac: r.tc? r.net/r.tc:0}));
+  const medNet = median(withRoas.map(r=>r.net));
+  const medRoas = median(withRoas.map(r=>r.roas));
+  const goodRows = withRoas.filter(r=> r.net>=medNet || r.roas>=medRoas);
+  const badRows = withRoas.filter(r=> r.net<medNet && r.roas<medRoas);
+  document.getElementById('e-good').textContent = goodRows.length;
+  document.getElementById('e-bad').textContent = badRows.length;
+  document.getElementById('e-bad-sub').textContent = 'Trong tổng '+withRoas.length+' CTKM Instore đủ dữ liệu đánh giá';
+
+  // narrative — dựa trên doanh thu sau khấu hao (Net), chỉ xét CTKM Instore
+  const byNetDesc = [...withRoas].sort((a,b)=>b.net-a.net);
+  const durAggEarly = instoreDurationAgg(f);
+  const durCandidatesEarly = durAggEarly.filter(r=> r.tc>0 && r.spanDays>=15 && r.spanDays<=30);
+  const worstByNet = durCandidatesEarly.length
+    ? [...durCandidatesEarly].sort((a,b)=>a.net-b.net)[0]
+    : null;
+  const topByNet = byNetDesc[0];
+  const bestSmall = [...withRoas].filter(r=>r.net<medNet).sort((a,b)=>b.roas-a.roas)[0];
+  document.getElementById('exec-p1').innerHTML = topByNet
+    ? `<b>1.</b> "${topByNet.scheme_code}" (Instore) là CTKM đóng góp doanh thu sau khấu hao lớn nhất (${fmtVND(topByNet.net)} đ), AC ${fmtVND(topByNet.ac)} đ/lượt.`
+    : '';
+  document.getElementById('exec-p2').innerHTML = worstByNet
+    ? `<b>2.</b> "${worstByNet.scheme_code}" (Instore, đã chạy ${worstByNet.spanDays} ngày) đóng góp doanh thu sau khấu hao thấp nhất trong nhóm đủ điều kiện đánh giá (${fmtVND(worstByNet.net)} đ)`
+      + (worstByNet.storesZero>0 ? `, và có ${worstByNet.storesZero}/${worstByNet.storesTotal.size} cửa hàng chưa ghi nhận lượt dùng nào` : '')
+      + ` — nên xem lại có tiếp tục chạy hay không.`
+    : '<b>2.</b> Không có CTKM Instore nào chạy đủ 15–30 ngày trong phạm vi lọc hiện tại để đánh giá công bằng.';
+  document.getElementById('exec-p3').innerHTML = bestSmall
+    ? `<b>3.</b> "${bestSmall.scheme_code}" (Instore) tuy quy mô còn nhỏ nhưng hiệu suất tới ${fmtX(bestSmall.roas)} — có thể cân nhắc nhân rộng thêm cửa hàng.`
+    : '';
+
+  // channel efficiency (vẫn giữ so sánh cả 3 kênh để thấy vì sao chỉ tập trung Instore)
+  const chAgg = {};
+  customerRows.forEach(r=>{ if(!chAgg[r.lvl2]) chAgg[r.lvl2]={net:0,promo:0}; chAgg[r.lvl2].net+=r.net; chAgg[r.lvl2].promo+=r.promo; });
+  const chColors = {Instore:'#0F9D8C','3P':'#123A5E','1P':'#E8912D'};
+  const chEntries = Object.entries(chAgg).map(([k,v])=>[k, v.promo? v.net/v.promo:0]).sort((a,b)=>b[1]-a[1]);
+  makeChart('chartExecChannel', {type:'bar', data:{labels:chEntries.map(x=>x[0]), datasets:[{data:chEntries.map(x=>x[1]),
+      backgroundColor:chEntries.map(x=>chColors[x[0]]||'#888'), borderRadius:8, borderSkipped:false, maxBarThickness:50}]},
+    options:{indexAxis:'y', plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>' Hiệu suất: '+fmtX(ctx.parsed.x)}}},
+      scales:{ x:{grid:GRID, border:{display:false}, ticks:{callback:v=>v.toFixed(0)+'x'}}, y:{grid:NOGRID, border:{display:false}} }}});
+
+  // top5 / bottom5 — CHỈ Instore, xếp theo Doanh thu sau khấu hao (Net)
+  const tGood = document.getElementById('exec-top-good'); tGood.innerHTML='';
+  byNetDesc.slice(0,5).forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.scheme_code}</td><td><b style="color:#0B7A6C">${fmtVND(r.net)} đ</b></td><td>${fmtVND(r.ac)} đ</td>`;
+    tGood.appendChild(tr);
+  });
+  const tBad = document.getElementById('exec-top-bad'); tBad.innerHTML='';
+  const durCandidates = durCandidatesEarly;
+  document.getElementById('bottom-note').textContent = durCandidates.length
+    ? 'Trong phạm vi lọc hiện tại: '+durCandidates.length+' CTKM Instore đã chạy đủ 15–30 ngày để đánh giá công bằng.'
+    : 'Không có CTKM Instore nào chạy đủ 15–30 ngày trong phạm vi lọc hiện tại (thử bỏ bớt bộ lọc Tuần để xem toàn kỳ).';
+  durCandidates.sort((a,b)=>a.net-b.net).slice(0,5).forEach(r=>{
+    const tr = document.createElement('tr');
+    const zeroNote = r.storesZero>0 ? `<div style="font-size:11px;color:#B23328;">${r.storesZero}/${r.storesTotal.size} quán chưa ghi nhận lượt dùng</div>` : '';
+    tr.innerHTML = `<td>${r.scheme_code} (${r.spanDays} ngày)${zeroNote}</td><td><b style="color:#B23328">${fmtVND(r.net)} đ</b></td><td>${fmtVND(r.ac)} đ</td>`;
+    tBad.appendChild(tr);
+  });
+
+  // action recommendations — chỉ dựa trên CTKM Instore (nhóm có thể chủ động điều chỉnh)
+  const actions = [];
+  if(worstByNet) actions.push([worstByNet.scheme_code,
+    'Đã chạy '+worstByNet.spanDays+' ngày, doanh thu sau khấu hao vẫn thấp nhất nhóm'+
+    (worstByNet.storesZero>0 ? ' và '+worstByNet.storesZero+' cửa hàng chưa dùng — kiểm tra lý do (thiếu POSM/nhân viên chưa nắm chương trình) trước khi quyết định dừng hay hỗ trợ thêm' : ' — xem lại mức chiết khấu hoặc cân nhắc dừng'),
+    'high', 'Doanh thu sau khấu hao tăng lên trên mức trung vị ('+fmtVND(medNet)+' đ)']);
+  if(bestSmall) actions.push([bestSmall.scheme_code, 'Nhân rộng sang thêm cửa hàng Instore, theo dõi hiệu suất có giữ được khi tăng quy mô', 'med', 'Hiệu suất không giảm quá 20% khi lượt dùng tăng']);
+  if(internalRows.length) actions.push(['Nhóm mã nội bộ ('+internalRows.length+' mã)', 'Tách hạch toán riêng khỏi ngân sách CTKM khách hàng để không làm lệch số liệu hiệu quả', 'low', 'Có mục chi phí nội bộ riêng trên báo cáo']);
+  actions.push(['CTKM 3P/1P', 'Không đề xuất điều chỉnh trực tiếp — do đối tác nền tảng (Grab/Be/ShopeeFood...) kiểm soát cơ chế, công ty chỉ có thể đàm phán qua hợp đồng hợp tác', 'low', 'Theo dõi hiệu suất kênh 3P/1P định kỳ để phục vụ đàm phán']);
+  actions.push(['Toàn bộ báo cáo', 'Bổ sung dữ liệu doanh thu tổng (kể cả giao dịch không khuyến mãi) để tính đúng % doanh thu CTKM/tổng doanh thu', 'high', 'Có số liệu Total Revenue theo ngày/cửa hàng']);
+  const tAct = document.getElementById('exec-actions'); tAct.innerHTML='';
+  actions.forEach(([name,act,prio,kpi])=>{
+    const tr = document.createElement('tr');
+    const prioLabel = {high:'Cao', med:'Trung bình', low:'Thấp'}[prio];
+    tr.innerHTML = `<td><b>${name}</b></td><td>${act}</td><td><span class="prio ${prio}">${prioLabel}</span></td><td>${kpi}</td>`;
+    tAct.appendChild(tr);
+  });
+}
+
+function renderCTKM(f){
+  const {internalRows, customerRows, bigRows, smallRows} = schemeAggregate(f);
+  const totalNet = customerRows.reduce((a,r)=>a+r.net,0);
+  const totalDiscount = customerRows.reduce((a,r)=>a+r.discount,0);
+  const totalPromo = customerRows.reduce((a,r)=>a+r.promo,0);
+  document.getElementById('c-net').textContent = fmtVND(totalNet)+' đ';
+  document.getElementById('c-disc').textContent = fmtVND(totalDiscount)+' đ';
+  document.getElementById('c-disc-note').textContent = 'Chi phí trợ giá (chương trình) — đã loại nội bộ';
+  document.getElementById('c-roas').textContent = totalPromo? fmtX(totalNet/totalPromo) : '-';
+  document.getElementById('c-count').textContent = bigRows.length;
+  document.getElementById('c-count-note').textContent = smallRows.length+' mã nhỏ (<10 lượt) đã gộp · '+internalRows.length+' mã nội bộ tách riêng';
+
+  // Quadrant scatter — bigRows only, bubble size by usage count
+  const scatterPts = bigRows.map(r=>({x:r.net, y:r.promo? r.net/r.promo:0, label:r.scheme_code, tc:r.tc}));
+  const medNet = median(scatterPts.map(p=>p.x));
+  const medRoas = median(scatterPts.map(p=>p.y));
+  const colorFor = p=>{
+    if(p.x>=medNet && p.y>=medRoas) return '#0F9D8C';
+    if(p.x>=medNet && p.y<medRoas) return '#D9483B';
+    if(p.x<medNet && p.y>=medRoas) return '#123A5E';
+    return '#9AA7B0';
+  };
+  const maxTc = Math.max(...scatterPts.map(p=>p.tc), 1);
+  if(charts['chartQuadrant']) charts['chartQuadrant'].destroy();
+  const quadChart = new Chart(document.getElementById('chartQuadrant'), {type:'scatter', data:{datasets:[{
+      data:scatterPts,
+      backgroundColor:scatterPts.map(p=>colorFor(p)+'CC'),
+      borderColor:scatterPts.map(colorFor), borderWidth:1.5,
+      radius:scatterPts.map(p=>4+Math.sqrt(p.tc/maxTc)*14),
+      hoverRadius:scatterPts.map(p=>6+Math.sqrt(p.tc/maxTc)*16), hoverBorderWidth:2
+    }]}, options:{
+      plugins:{legend:{display:false}, tooltip:{callbacks:{
+        title:ctx=>scatterPts[ctx[0].dataIndex].label,
+        label:ctx=>{ const p = scatterPts[ctx.dataIndex]; return ['Net: '+fmtVND(p.x)+' đ', 'Hiệu suất: '+fmtX(p.y), 'Lượt dùng: '+fmtInt(p.tc)]; }
+      }}},
+      scales:{ x:{grid:GRID, border:{display:false}, title:{display:true,text:'Doanh thu thực nhận (quy mô) →', color:'#8E9CA8', font:{size:11}}, ticks:{callback:v=>fmtVND(v)}},
+               y:{grid:GRID, border:{display:false}, title:{display:true,text:'Hiệu suất (lần) →', color:'#8E9CA8', font:{size:11}}} }
+  }});
+  quadChart._quadrant = {mx:medNet, my:medRoas};
+  charts['chartQuadrant']=quadChart;
+
+  // Group bar chart
+  const grpAgg = {};
+  customerRows.forEach(r=>{ grpAgg[r.grp]=(grpAgg[r.grp]||0)+r.net; });
+  const grpSorted = Object.entries(grpAgg).sort((a,b)=>b[1]-a[1]);
+  const grpColors = ['#0F9D8C','#123A5E','#E8912D','#7B5EA7','#1B8FBF','#4E8C6E','#B4650B','#5B3F91','#0B7A6C','#3D6E9A','#8A6D3B','#6B7F8C'];
+  makeChart('chartSchemeGroup', hbar(grpSorted.map(x=>GRP_LABEL[x[0]]||x[0]), grpSorted.map(x=>x[1]),
+    grpSorted.map((_,i)=>grpColors[i%grpColors.length])));
+
+  // Main scheme table: big rows sorted by net, then one aggregated "Khac" row
+  const tbody3 = document.querySelector('#tbl-scheme tbody'); tbody3.innerHTML='';
+  bigRows.sort((a,b)=>b.net-a.net).forEach(r=>{
+    const roas = r.promo? r.net/r.promo : 0;
+    const costPerUse = r.tc? r.discount/r.tc : 0;
+    const ac = r.tc? r.net/r.tc : 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.scheme_code}</td><td><span class="tag grp">${GRP_LABEL[r.grp]||r.grp}</span></td>
+      <td><span class="tag ${r.lvl2==='3P'?'p3':(r.lvl2==='1P'?'p1':'instore')}">${r.lvl2}</span></td>
+      <td><b>${fmtVND(r.net)}</b></td><td>${fmtVND(r.discount)}</td>
+      <td>${fmtVND(ac)} đ</td>
+      <td>${fmtX(roas)}</td><td>${fmtVND(costPerUse)} đ</td>
+      <td>${r.stores.size}</td><td>${fmtInt(r.tc)}</td>`;
+    tbody3.appendChild(tr);
+  });
+  if(smallRows.length){
+    const sNet = smallRows.reduce((a,r)=>a+r.net,0);
+    const sDisc = smallRows.reduce((a,r)=>a+r.discount,0);
+    const sPromo = smallRows.reduce((a,r)=>a+r.promo,0);
+    const sTc = smallRows.reduce((a,r)=>a+r.tc,0);
+    const sStores = new Set(); smallRows.forEach(r=>r.stores.forEach(s=>sStores.add(s)));
+    const tr = document.createElement('tr'); tr.className='row-khac';
+    tr.innerHTML = `<td>Các mã nhỏ khác (${smallRows.length} mã, dưới 10 lượt dùng)</td><td>—</td><td>—</td>
+      <td>${fmtVND(sNet)}</td><td>${fmtVND(sDisc)}</td>
+      <td>${sTc?fmtVND(sNet/sTc):'-'} đ</td>
+      <td>${sPromo?fmtX(sNet/sPromo):'-'}</td>
+      <td>${sTc?fmtVND(sDisc/sTc):'-'} đ</td><td>${sStores.size}</td><td>${fmtInt(sTc)}</td>`;
+    tbody3.appendChild(tr);
+  }
+
+  // Internal table
+  const tbody4 = document.querySelector('#tbl-internal tbody'); tbody4.innerHTML='';
+  internalRows.sort((a,b)=>b.tc-a.tc).forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.scheme_code}</td><td>${fmtInt(r.tc)}</td><td>${r.stores.size}</td>`;
+    tbody4.appendChild(tr);
+  });
+}
+
+function median(arr){
+  const a = [...arr].sort((x,y)=>x-y);
+  const n = a.length; if(!n) return 0;
+  return n%2? a[(n-1)/2] : (a[n/2-1]+a[n/2])/2;
+}
+
+document.querySelectorAll('th[data-k]').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const table = th.closest('table');
+    const tbody = table.querySelector('tbody');
+    const rows = [...tbody.querySelectorAll('tr')];
+    const idx = [...th.parentElement.children].indexOf(th);
+    const asc = th.dataset.asc = th.dataset.asc==='1'?'0':'1';
+    rows.sort((a,b)=>{
+      let x=a.children[idx].textContent.replace(/[^\d.,-]/g,'').replace(/\./g,'').replace(',','.');
+      let y=b.children[idx].textContent.replace(/[^\d.,-]/g,'').replace(/\./g,'').replace(',','.');
+      const xn=parseFloat(x), yn=parseFloat(y);
+      if(!isNaN(xn) && !isNaN(yn)) return asc==='1'? xn-yn : yn-xn;
+      return asc==='1'? a.children[idx].textContent.localeCompare(b.children[idx].textContent)
+                       : b.children[idx].textContent.localeCompare(a.children[idx].textContent);
+    });
+    rows.forEach(r=>tbody.appendChild(r));
+  });
+});
+
+async function loadJSON(path){
+  const res = await fetch(path);
+  if(!res.ok) throw new Error('HTTP '+res.status+' khi tải '+path);
+  return res.json();
+}
+
+async function init(){
+  try{
+    const [daily, meta, manifest] = await Promise.all([
+      loadJSON('data/daily.json'),
+      loadJSON('data/meta.json'),
+      loadJSON('data/fact-manifest.json')
+    ]);
+    const factChunks = await Promise.all(manifest.files.map(f=>loadJSON('data/'+f)));
+    RAW = { dailyFull: daily, fact: factChunks.flat(), schemeMeta: meta.schemeMeta, weekMeta: meta.weekMeta, maxDate: meta.maxDate };
+  }catch(e){
+    document.getElementById('load-msg').innerHTML =
+      '⚠ Không tải được dữ liệu ('+e.message+').<br>Hãy chạy: <code>python3 -m http.server 8000</code> trong thư mục này rồi mở '+
+      '<b>http://localhost:8000/dashboard.html</b> (không mở trực tiếp file, trình duyệt sẽ chặn fetch). Kiểm tra thư mục <code>data/</code> có đủ: daily.json, meta.json, fact-manifest.json và các file fact-*.json trong manifest.';
+    return;
+  }
+  FACT = RAW.fact.map(r=>({
+    scheme_code:r.sc, store_code:r.sco, store_name:r.sn, DM:r.dm, OM:r.om,
+    lvl1:r.l1, lvl2:r.l2, gross:r.gr, discount:r.di, net:r.ne, promo:r.pr, tc:r.tc, week:String(r.wk)
+  }));
+  DAILY = RAW.dailyFull.map(r=>({d:r.d, store_name:r.sn, DM:r.dm, OM:r.om, lvl1:r.l1, lvl2:r.l2, net:r.ne, week:String(r.wk)}));
+  SCHEME_META = RAW.schemeMeta;
+  WEEK_META = RAW.weekMeta;
+  MAX_DATE = RAW.maxDate;
+
+  const allDates = DAILY.map(r=>r.d).sort();
+  if(allDates.length){
+    const fmtD = s=>{ const [y,m,d]=s.split('-'); return d+'/'+m; };
+    document.getElementById('trend-desc').textContent =
+      'Phân theo Instore / 3P / 1P — '+fmtD(allDates[0])+'–'+fmtD(allDates[allDates.length-1])+'/'+allDates[allDates.length-1].slice(0,4)+' · đã liên kết với Store / DM / OM / Channel ở trên';
+  }
+
+  fillWeeks();
+  document.getElementById('sb-footer').innerHTML =
+    'Dữ liệu cập nhật đến: <b>'+MAX_DATE+'</b><br>'+
+    uniqueSorted(FACT,'store_name',()=>true).length+' store · '+
+    uniqueSorted(FACT,'DM',()=>true).length+' DM · '+
+    uniqueSorted(FACT,'OM',()=>true).length+' OM · '+
+    uniqueSorted(FACT,'scheme_code',()=>true).length+' mã CTKM';
+
+  rebuildOptions();
+  render();
+  document.getElementById('load-overlay').style.display='none';
+}
+init();
+</script>
+</body>
+</html>
