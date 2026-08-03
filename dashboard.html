@@ -13,27 +13,54 @@
 }
 *{box-sizing:border-box;}
 body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;}
-.topbar{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%); color:#fff; padding:18px 28px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 10px rgba(11,37,64,.25);}
-.topbar .brand{display:flex; align-items:center; gap:12px;}
-.brand .logo{width:38px; height:38px; border-radius:9px; background:var(--teal); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; color:#062018;}
-.brand h1{font-size:17px; margin:0; font-weight:700; letter-spacing:.2px;}
-.brand p{margin:0; font-size:11.5px; color:#B9C8D6;}
-.topbar .meta{font-size:12px; color:#B9C8D6; text-align:right; line-height:1.5;}
-.topbar .meta b{color:#fff;}
-.tabs{display:flex; gap:2px; background:var(--navy); padding:0 24px; overflow-x:auto;}
-.tab-btn{background:transparent; border:none; color:#9FB4C6; padding:13px 18px; font-size:13.5px; font-weight:600; cursor:pointer; border-bottom:3px solid transparent; white-space:nowrap;}
-.tab-btn.active{color:#fff; border-bottom-color:var(--teal); background:rgba(255,255,255,.04);}
-.tab-btn:hover{color:#fff;}
-.filterbar{background:var(--card); border-bottom:1px solid var(--line); padding:12px 24px; display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; position:sticky; top:0; z-index:20; box-shadow:0 2px 6px rgba(16,30,45,.04);}
-.f-group{display:flex; flex-direction:column; gap:4px;}
-.f-group label{font-size:10.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--sub); font-weight:700;}
-.f-group select{padding:7px 10px; border-radius:7px; border:1px solid var(--line); background:#FAFBFC; font-size:13px; color:var(--text); min-width:160px;}
-.chip-group{display:flex; gap:6px;}
-.chip{padding:6px 12px; border-radius:20px; border:1.5px solid var(--line); background:#FAFBFC; font-size:12.5px; cursor:pointer; color:var(--sub); font-weight:600; user-select:none;}
-.chip.active{background:var(--teal); border-color:var(--teal); color:#fff;}
-.reset-btn{margin-left:auto; padding:8px 16px; border-radius:7px; border:1.5px solid var(--red); color:var(--red); background:#fff; font-size:12.5px; font-weight:700; cursor:pointer; height:34px;}
-.reset-btn:hover{background:#FDEEEC;}
-.active-note{padding:9px 24px; background:#EFFAF8; border-bottom:1px solid #D3EFE9; font-size:12.5px; color:#0B7A6C; font-weight:600;}
+
+.app-shell{display:flex; min-height:100vh; align-items:stretch;}
+
+/* ---- SIDEBAR ---- */
+.sidebar{
+  width:270px; flex-shrink:0; background:#fff; border-right:1px solid var(--line);
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.sb-brand{display:flex; align-items:center; gap:11px; padding:20px 18px 16px;}
+.sb-logo{width:36px; height:36px; border-radius:9px; background:linear-gradient(135deg,var(--navy),var(--navy2)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#fff; flex-shrink:0;}
+.sb-brand h1{font-size:15.5px; margin:0; font-weight:800; color:var(--navy); letter-spacing:.2px;}
+.sb-brand p{margin:1px 0 0; font-size:11px; color:var(--sub);}
+
+.sb-nav{display:flex; flex-direction:column; gap:1px; padding:2px 12px 14px;}
+.sb-nav-btn{
+  text-align:left; background:transparent; border:none; padding:10px 12px; border-radius:8px;
+  font-size:13px; font-weight:600; color:var(--sub); cursor:pointer; white-space:nowrap;
+}
+.sb-nav-btn:hover{background:#F5F8F9; color:var(--navy);}
+.sb-nav-btn.active{background:var(--teal); color:#fff;}
+
+.sb-section{padding:0 18px; margin-top:6px;}
+.sb-section-title{font-size:10.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--sub); font-weight:700; margin:14px 0 8px;}
+.sb-fgroup{margin-bottom:14px;}
+.sb-fgroup label{display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--sub); font-weight:700; margin-bottom:6px;}
+.sb-fgroup select{width:100%; padding:8px 10px; border-radius:7px; border:1px solid var(--line); background:#FAFBFC; font-size:12.8px; color:var(--text);}
+.sb-chip-wrap{display:flex; flex-wrap:wrap; gap:6px;}
+.sb-chip{padding:6px 11px; border-radius:20px; border:1.5px solid var(--line); background:#FAFBFC; font-size:12px; cursor:pointer; color:var(--sub); font-weight:600; user-select:none; white-space:nowrap;}
+.sb-chip.active{background:var(--teal); border-color:var(--teal); color:#fff;}
+.sb-reset{width:100%; padding:9px 0; border-radius:8px; border:1.5px solid var(--red); color:var(--red); background:#fff; font-size:12.5px; font-weight:700; cursor:pointer; margin-top:4px;}
+.sb-reset:hover{background:#FDEEEC;}
+.sb-footer{margin-top:auto; padding:14px 18px 20px; font-size:11px; color:var(--sub); line-height:1.7; border-top:1px solid var(--line);}
+.sb-footer b{color:var(--navy);}
+
+/* ---- MAIN ---- */
+.main-content{flex:1; min-width:0; display:flex; flex-direction:column;}
+.topstrip{
+  padding:11px 26px; background:#EFFAF8; border-bottom:1px solid #D3EFE9; font-size:12.5px;
+  color:#0B7A6C; font-weight:600; position:sticky; top:0; z-index:15;
+}
+.section-num{display:flex; align-items:center; gap:10px; margin:22px 0 12px;}
+.section-num:first-child{margin-top:0;}
+.section-num .badge{
+  width:24px; height:24px; border-radius:6px; background:var(--navy); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0;
+}
+.section-num .txt{font-size:14.5px; font-weight:700; color:var(--navy);}
+
 .content{padding:22px 24px 60px;}
 .panel{display:none;}
 .panel.active{display:block;}
@@ -102,44 +129,55 @@ tr.row-khac td{color:var(--sub); font-style:italic;}
 </div>
 <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
 
-<div class="topbar">
-  <div class="brand">
-    <div class="logo">HL</div>
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">HL</div>
     <div>
-      <h1>MKT Revenue &amp; Scheme Dashboard</h1>
-      <p>Bản xem trước cấu trúc (HTML Preview) · Nguồn: Raw_Data_MKT.xlsx</p>
+      <h1>Highlands BI</h1>
+      <p>Dashboard Doanh Thu MKT</p>
     </div>
   </div>
-  <div class="meta" id="topbar-meta">Đang tải dữ liệu ...</div>
-</div>
 
-<div class="tabs" id="tabs"></div>
+  <nav class="sb-nav" id="tabs"></nav>
 
-<div class="filterbar">
-  <div class="f-group"><label>Tháng</label><select id="f-month"><option value="">Tất cả</option></select></div>
-  <div class="f-group"><label>Tuần <span style="font-weight:400; text-transform:none;">(so sánh WoW)</span></label><select id="f-week"><option value="">Tất cả</option></select></div>
-  <div class="f-group"><label>OM</label><select id="f-om"><option value="">Tất cả</option></select></div>
-  <div class="f-group"><label>DM</label><select id="f-dm"><option value="">Tất cả</option></select></div>
-  <div class="f-group"><label>Store</label><select id="f-store"><option value="">Tất cả</option></select></div>
-  <div class="f-group"><label>Mã CTKM</label><select id="f-scheme"><option value="">Tất cả</option></select></div>
-  <div class="f-group"><label>Kênh (Channel)</label>
-    <div class="chip-group" id="chip-lvl1">
-      <div class="chip active" data-val="">Tất cả</div>
-      <div class="chip" data-val="Instore">Instore</div>
-      <div class="chip" data-val="Online">Online</div>
+  <div class="sb-section">
+    <div class="sb-section-title">Bộ lọc thời gian</div>
+    <div class="sb-fgroup"><label>Tháng</label><select id="f-month"><option value="">Tất cả</option></select></div>
+    <div class="sb-fgroup"><label>Tuần (so sánh WoW)</label><select id="f-week"><option value="">Tất cả</option></select></div>
+
+    <div class="sb-section-title">Đơn vị quản lý</div>
+    <div class="sb-fgroup"><label>OM</label><select id="f-om"><option value="">Tất cả</option></select></div>
+    <div class="sb-fgroup"><label>DM</label><select id="f-dm"><option value="">Tất cả</option></select></div>
+    <div class="sb-fgroup"><label>Cửa hàng</label><select id="f-store"><option value="">Tất cả</option></select></div>
+    <div class="sb-fgroup"><label>Mã CTKM</label><select id="f-scheme"><option value="">Tất cả</option></select></div>
+
+    <div class="sb-section-title">Kênh bán hàng</div>
+    <div class="sb-fgroup">
+      <div class="sb-chip-wrap" id="chip-lvl1">
+        <div class="sb-chip active" data-val="">Tất cả</div>
+        <div class="sb-chip" data-val="Instore">Instore</div>
+        <div class="sb-chip" data-val="Online">Online</div>
+      </div>
     </div>
-  </div>
-  <div class="f-group"><label>Instore / 3P / 1P</label>
-    <div class="chip-group" id="chip-lvl2">
-      <div class="chip active" data-val="">Tất cả</div>
-      <div class="chip" data-val="Instore">Instore</div>
-      <div class="chip" data-val="3P">3P</div>
-      <div class="chip" data-val="1P">1P</div>
+    <div class="sb-fgroup">
+      <label>Instore / 3P / 1P</label>
+      <div class="sb-chip-wrap" id="chip-lvl2">
+        <div class="sb-chip active" data-val="">Tất cả</div>
+        <div class="sb-chip" data-val="Instore">Instore</div>
+        <div class="sb-chip" data-val="3P">3P</div>
+        <div class="sb-chip" data-val="1P">1P</div>
+      </div>
     </div>
+
+    <button class="sb-reset" id="reset-btn">↺ Đặt lại bộ lọc</button>
   </div>
-  <button class="reset-btn" id="reset-btn">↺ Xóa bộ lọc</button>
-</div>
-<div class="active-note" id="active-note">Đang hiển thị: Tất cả dữ liệu</div>
+
+  <div class="sb-footer" id="sb-footer">Đang tải dữ liệu...</div>
+</aside>
+
+<main class="main-content">
+<div class="topstrip" id="active-note">Đang hiển thị: Tất cả dữ liệu</div>
 
 <div class="content">
 
@@ -153,6 +191,7 @@ tr.row-khac td{color:var(--sub); font-style:italic;}
       <p id="exec-p3">-</p>
     </div>
 
+    <div class="section-num"><span class="badge">1</span><span class="txt">Tổng quan hiệu quả CTKM</span></div>
     <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);">
       <div class="kpi navy">
         <div class="lbl">Doanh thu từ CTKM</div>
@@ -181,6 +220,7 @@ tr.row-khac td{color:var(--sub); font-style:italic;}
       </div>
     </div>
 
+    <div class="section-num"><span class="badge">2</span><span class="txt">Hiệu suất theo kênh bán hàng</span></div>
     <div class="stack">
       <div class="card">
         <div class="card-head"><div><h3>Hiệu suất theo kênh bán hàng</h3><div class="desc">Kênh nào đang dùng chi phí trợ giá hiệu quả nhất — Instore / 3P / 1P (theo bộ lọc hiện tại)</div></div></div>
@@ -188,6 +228,7 @@ tr.row-khac td{color:var(--sub); font-style:italic;}
       </div>
     </div>
 
+    <div class="section-num"><span class="badge">3</span><span class="txt">Top 5 / Bottom 5 CTKM Instore</span></div>
     <div class="grid2col">
       <div class="card">
         <h3 style="color:#0B7A6C;">✓ Top 5 CTKM Instore hiệu quả nhất</h3>
@@ -204,7 +245,8 @@ tr.row-khac td{color:var(--sub); font-style:italic;}
       </div>
     </div>
 
-    <div class="card" style="margin-top:16px;">
+    <div class="section-num"><span class="badge">4</span><span class="txt">Đề xuất hành động</span></div>
+    <div class="card" style="margin-top:0;">
       <h3>Đề xuất hành động</h3>
       <div class="desc">Dựa trên phân tích Quy mô × Hiệu quả trong phạm vi bộ lọc hiện tại</div>
       <table class="mini-tbl">
@@ -216,6 +258,7 @@ tr.row-khac td{color:var(--sub); font-style:italic;}
 
   <!-- TAB 1: TONG QUAN -->
   <div class="panel" id="panel-overview">
+    <div class="section-num"><span class="badge">1</span><span class="txt">Tổng quan doanh thu</span></div>
     <div class="kpi-row">
       <div class="kpi"><div class="lbl">Doanh thu Net</div><div class="val" id="k-net">-</div><div class="sub" id="k-net-sub">Tổng theo bộ lọc</div></div>
       <div class="kpi amber"><div class="lbl">Chiết khấu (Discount)</div><div class="val" id="k-disc">-</div><div class="sub" id="k-disc-rate">-</div></div>
@@ -223,6 +266,7 @@ tr.row-khac td{color:var(--sub); font-style:italic;}
       <div class="kpi"><div class="lbl">Doanh thu Gross</div><div class="val" id="k-gross">-</div><div class="sub">Trước chiết khấu</div></div>
       <div class="kpi amber"><div class="lbl">AC trung bình</div><div class="val" id="k-ac">-</div><div class="sub">Net / TC</div></div>
     </div>
+    <div class="section-num"><span class="badge">2</span><span class="txt">Biểu đồ chi tiết</span></div>
     <div class="stack">
       <div class="card">
         <div class="card-head">
@@ -377,7 +421,10 @@ tr.row-khac td{color:var(--sub); font-style:italic;}
 
 </div>
 
-<div class="footer-note">Preview tương tác dựng từ dữ liệu chi tiết Store × DM × OM × Scheme × Channel (25.752 dòng) trong Raw_Data_MKT.xlsx · Bản build chính thức (Power BI / Excel Power Pivot) sẽ mở rộng thêm Ngày/Tuần/Quý/Năm khi có đủ dữ liệu lịch sử.</div>
+<div class="footer-note">Preview tương tác dựng từ dữ liệu chi tiết Store × DM × OM × Scheme × Channel · Bản build chính thức (Power BI / Excel Power Pivot) sẽ mở rộng thêm Ngày/Tuần/Quý/Năm khi có đủ dữ liệu lịch sử.</div>
+
+</main>
+</div>
 
 <script>
 let RAW, FACT, DAILY, SCHEME_META, WEEK_META, MAX_DATE;
@@ -386,6 +433,8 @@ const GRP_LABEL = {
   LSM_HCM:'LSM HCM', GRAB:'Grab', MM:'MM', WO_NWSM:'WO NWSM', CB:'CB',
   KM_GACHGIA:'Khuyến mãi giá cố định', KHAC:'Nhóm nhỏ khác', NOIBO:'Nội bộ / Vận hành'
 };
+// Các nhóm CTKM thuộc đối tác nền tảng (Grab/Be/3P giao hàng) — dù có dòng nào gắn nhãn kênh "Instore"
+// vẫn không tính vào phân tích Instore vì công ty không chủ động điều chỉnh được cơ chế của đối tác.
 const PLATFORM_GROUPS = ['3Ps', 'GRAB', 'BE'];
 
 const TABS = [
@@ -399,10 +448,10 @@ const TABS = [
 const tabsEl = document.getElementById('tabs');
 TABS.forEach((t,i)=>{
   const b = document.createElement('button');
-  b.className = 'tab-btn' + (i===0?' active':'');
+  b.className = 'sb-nav-btn' + (i===0?' active':'');
   b.textContent = t.label;
   b.onclick = ()=>{
-    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.sb-nav-btn').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     document.getElementById('panel-'+t.id).classList.add('active');
@@ -462,19 +511,19 @@ document.getElementById('f-om').onchange = e=>{state.om=e.target.value; rebuildO
 document.getElementById('f-dm').onchange = e=>{state.dm=e.target.value; rebuildOptions(); render();};
 document.getElementById('f-store').onchange = e=>{state.store=e.target.value; rebuildOptions(); render();};
 document.getElementById('f-scheme').onchange = e=>{state.scheme=e.target.value; rebuildOptions(); render();};
-document.querySelectorAll('#chip-lvl1 .chip').forEach(c=>{
-  c.onclick=()=>{document.querySelectorAll('#chip-lvl1 .chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');state.lvl1=c.dataset.val;rebuildOptions();render();};
+document.querySelectorAll('#chip-lvl1 .sb-chip').forEach(c=>{
+  c.onclick=()=>{document.querySelectorAll('#chip-lvl1 .sb-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');state.lvl1=c.dataset.val;rebuildOptions();render();};
 });
-document.querySelectorAll('#chip-lvl2 .chip').forEach(c=>{
-  c.onclick=()=>{document.querySelectorAll('#chip-lvl2 .chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');state.lvl2=c.dataset.val;rebuildOptions();render();};
+document.querySelectorAll('#chip-lvl2 .sb-chip').forEach(c=>{
+  c.onclick=()=>{document.querySelectorAll('#chip-lvl2 .sb-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');state.lvl2=c.dataset.val;rebuildOptions();render();};
 });
 document.getElementById('reset-btn').onclick=()=>{
   state = {store:'', dm:'', om:'', scheme:'', lvl1:'', lvl2:'', week:''};
   document.getElementById('f-week').value='';
-  document.querySelectorAll('#chip-lvl1 .chip').forEach(x=>x.classList.remove('active'));
-  document.querySelector('#chip-lvl1 .chip').classList.add('active');
-  document.querySelectorAll('#chip-lvl2 .chip').forEach(x=>x.classList.remove('active'));
-  document.querySelector('#chip-lvl2 .chip').classList.add('active');
+  document.querySelectorAll('#chip-lvl1 .sb-chip').forEach(x=>x.classList.remove('active'));
+  document.querySelector('#chip-lvl1 .sb-chip').classList.add('active');
+  document.querySelectorAll('#chip-lvl2 .sb-chip').forEach(x=>x.classList.remove('active'));
+  document.querySelector('#chip-lvl2 .sb-chip').classList.add('active');
   rebuildOptions(); render();
 };
 
@@ -711,12 +760,13 @@ function render(){
 }
 
 function instoreDurationAgg(f){
-  // Với mỗi mã CTKM Instore (không tính nội bộ): tổng net/discount/promo/tc,
-  // số cửa hàng có bật CTKM, số cửa hàng KHÔNG ghi nhận lượt dùng nào, và thời lượng chạy (số ngày ước tính từ số tuần xuất hiện)
+  // Với mỗi mã CTKM Instore (không tính nội bộ, không tính nhóm 3P dù có dòng gắn nhãn Instore):
+  // tổng net/discount/promo/tc, số cửa hàng có bật CTKM, số cửa hàng KHÔNG ghi nhận lượt dùng nào,
+  // và thời lượng chạy (số ngày ước tính từ số tuần xuất hiện)
   const rows = {};
   f.forEach(r=>{
     if(r.lvl2!=='Instore') return;
-    const meta = SCHEME_META[r.scheme_code] || {i:false};
+    const meta = SCHEME_META[r.scheme_code] || {i:false, g:''};
     if(meta.i) return; // bỏ qua mã nội bộ
     if(PLATFORM_GROUPS.includes(meta.g)) return; // mã thuộc nhóm đối tác nền tảng (Grab/Be/3P) — dù có dòng gắn nhãn Instore, không tính vào đây
     if(!rows[r.scheme_code]) rows[r.scheme_code] = {
@@ -983,7 +1033,7 @@ async function init(){
   MAX_DATE = RAW.maxDate;
 
   fillWeeks();
-  document.getElementById('topbar-meta').innerHTML =
+  document.getElementById('sb-footer').innerHTML =
     'Dữ liệu cập nhật đến: <b>'+MAX_DATE+'</b><br>'+
     uniqueSorted(FACT,'store_name',()=>true).length+' store · '+
     uniqueSorted(FACT,'DM',()=>true).length+' DM · '+
